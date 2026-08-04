@@ -1,0 +1,18 @@
+# kind cluster for the SWA Server.
+#
+# Node image is PINNED to v1.35.5: SWA 1.0.2 supports Kubernetes 1.33-1.35.
+# Podman/Docker Desktop's built-in Kubernetes is 1.36.x, which is out of range.
+#
+# extraPortMappings publishes the SWA Server API (8443) on the macOS host so the
+# natively-running swa-agent can reach it at 127.0.0.1:8443.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: swa-lab
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.35.5
+    extraPortMappings:
+      - containerPort: 30443   # NodePort for the swa-server API service
+        hostPort: 8443
+        listenAddress: "127.0.0.1"
+        protocol: TCP

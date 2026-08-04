@@ -1,0 +1,9 @@
+.env
+artifacts/
+swa-release-v1.0.2/
+*.key
+*.crt
+*.srl
+*.jwt
+*.cert
+.env.bak
