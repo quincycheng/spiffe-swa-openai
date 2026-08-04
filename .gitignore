@@ -1,9 +1,29 @@
+# --- credentials: never commit ---
 .env
+.env.bak
+.env.local
+
+# --- key material and certificates ---
 artifacts/
-swa-release-v1.0.2/
+agent-config/x509pop.*
 *.key
 *.crt
-*.srl
-*.jwt
 *.cert
-.env.bak
+*.csr
+*.srl
+*.pem
+*.p12
+*.pfx
+
+# --- tokens ---
+*.jwt
+*-token.txt
+
+# --- licensed CyberArk software: obtain from the Marketplace, do not redistribute ---
+swa-release-*/
+swa-release-*.tgz
+*.tar
+
+# --- local scratch ---
+*.log
+.DS_Store

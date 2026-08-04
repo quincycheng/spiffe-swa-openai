@@ -5,6 +5,12 @@ something: OpenAI trades the SPIFFE JWT-SVID for a short-lived access token.
 
 No `OPENAI_API_KEY` is created, stored, or read at any point.
 
+The whole exchange, end to end — note that every arrow from your laptop is
+outbound, and OpenAI's only inbound fetch goes to CyberArk's public JWKS, never to
+you:
+
+![Token exchange sequence](images/03-token-exchange.png)
+
 ## 1. Configure the identity provider
 
 **Console** → your organization → **Settings** → **Security** → **Workload

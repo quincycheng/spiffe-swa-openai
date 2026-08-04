@@ -1,0 +1,38 @@
+graph LR
+    P["<b>00</b> · prerequisites<br/><i>brew, Podman, .env</i>"]
+    A["<b>01</b> · authenticate<br/><i>SWA_TOKEN</i>"]
+    T["<b>02</b> · trust domain<br/><i>swa-lab.local</i>"]
+
+    subgraph S3["03 · server side"]
+        direction TB
+        CA["x509pop CA"]
+        SG["server group<br/><i>holds the CA</i>"]
+        K["kind cluster"]
+        RG["register + Helm install<br/>⚠️ <i>service.type=NodePort in Helm,<br/>never by kubectl patch</i>"]
+        CA --> SG --> K --> RG
+    end
+
+    subgraph S4["04 · agent side"]
+        direction TB
+        NG["node group<br/>⚠️ <i>create after the server is running,<br/>or wait out a 15-min sync</i>"]
+        AC["agent certificate<br/>⚠️ <b>CN must equal the node group name</b>"]
+        AR["run the agent<br/><i>attested=true</i>"]
+        NG --> AC --> AR
+    end
+
+    SV["<b>05</b> · fetch + verify SVID<br/><i>RS512, public JWKS</i>"]
+    F["<b>06</b> · OpenAI federation<br/><b>HTTP 200, no API key</b>"]
+
+    P --> A --> T --> CA
+    RG --> NG
+    AR --> SV --> F
+
+    style S3 fill:#eef3fd,stroke:#3367d6,stroke-width:2px,color:#1a3a7a
+    style S4 fill:#fff6ea,stroke:#e8710a,stroke-width:2px,color:#8a4300
+
+    classDef step fill:#fff,stroke:#5f6368,stroke-width:2px,color:#111
+    classDef warn fill:#fffaf0,stroke:#f9ab00,stroke-width:2px,color:#111
+    classDef done fill:#edf7f0,stroke:#137333,stroke-width:2px,color:#111
+    class P,A,T,CA,SG,K,AR step
+    class RG,NG,AC warn
+    class SV,F done

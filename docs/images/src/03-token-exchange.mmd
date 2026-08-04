@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    participant W as your process
+    participant A as SWA Agent<br/>(macOS native)
+    participant S as SWA Server<br/>(kind)
+    participant C as SWA control plane<br/>(SaaS)
+    participant O as OpenAI
+
+    Note over A,S: at agent startup, once
+    A->>C: GET /.well-known/ca-bundles
+    C-->>A: trust bundle (base64 DER)
+    A->>S: attest node (x509pop challenge)
+    S-->>A: attested=true
+    S->>C: upload RS512 signing key (kid)
+
+    Note over W,O: per request, no secret involved
+    W->>A: fetch JWT-SVID<br/>aud=https://api.openai.com/v1
+    A->>S: request SVID for this workload
+    S-->>A: JWT-SVID signed RS512
+    A-->>W: sub=spiffe://swa-lab.local/…/workload/qcheng<br/>TTL 300s
+
+    W->>O: POST /oauth/token (RFC 8693)<br/>subject_token=JWT-SVID
+    O->>C: GET /.well-known/jwks
+    C-->>O: RS512 public key for kid
+    Note over O: verify signature, iss, aud, exp<br/>match sub to service account
+    O-->>W: access_token, expires_in=299
+
+    W->>O: GET /v1/models<br/>Authorization: Bearer …
+    O-->>W: HTTP 200 ✅

@@ -1,0 +1,41 @@
+graph TB
+    subgraph LAPTOP["🖥️  your macOS laptop — no inbound network path"]
+        WL["<b>your process</b><br/><i>scripts/fetch-svid.sh</i>"]
+        AG["<b>SWA Agent</b><br/><i>native darwin/arm64 binary</i>"]
+        subgraph KIND["kind cluster on Podman"]
+            SRV["<b>SWA Server</b><br/><i>127.0.0.1:8443</i>"]
+        end
+    end
+
+    subgraph CP["☁️  CyberArk SWA control plane — SaaS"]
+        TD["<b>trust domain</b><br/>swa-lab.local"]
+        JWKS["<b>public JWKS</b><br/><i>/.well-known/jwks</i>"]
+    end
+
+    subgraph OAI["☁️  OpenAI"]
+        TOK["<b>auth.openai.com</b><br/><i>/oauth/token</i>"]
+        API["<b>api.openai.com</b><br/><i>/v1/models</i>"]
+    end
+
+    WL -->|"① fetch JWT-SVID<br/>over unix socket"| AG
+    AG -->|"② attest node<br/><i>x509pop</i>"| SRV
+    SRV -->|"③ upload RS512<br/>signing key"| TD
+    TD --- JWKS
+    WL -->|"④ token exchange<br/><i>RFC 8693</i>"| TOK
+    TOK -->|"⑤ fetch public key<br/>by <b>kid</b>"| JWKS
+    TOK -.->|"⑥ access_token<br/>TTL 299s"| WL
+    WL -->|"⑦ HTTP 200<br/><b>no API key</b>"| API
+
+    style LAPTOP fill:#eef3fd,stroke:#3367d6,stroke-width:2px,color:#1a3a7a
+    style KIND fill:#dde7fb,stroke:#3367d6,stroke-dasharray:5 4,color:#1a3a7a
+    style CP fill:#fff6ea,stroke:#e8710a,stroke-width:2px,color:#8a4300
+    style OAI fill:#edf7f0,stroke:#137333,stroke-width:2px,color:#0b5323
+
+    classDef laptop fill:#fff,stroke:#3367d6,stroke-width:2px,color:#111
+    classDef cloud fill:#fff,stroke:#e8710a,stroke-width:2px,color:#111
+    classDef openai fill:#fff,stroke:#137333,stroke-width:2px,color:#111
+    classDef key fill:#fff,stroke:#c5221f,stroke-width:3px,color:#111
+    class WL,AG,SRV laptop
+    class TD cloud
+    class JWKS key
+    class TOK,API openai

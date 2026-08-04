@@ -28,30 +28,7 @@ authority the API provider already trusts.
 
 ## What actually happens
 
-```
-┌──────────────────────── your macOS laptop ────────────────────────┐
-│                                                                   │
-│   your process ──① fetch JWT-SVID──▶ SWA Agent (native binary)    │
-│        │                                    │                     │
-│        │                          ② attests via x509pop           │
-│        │                                    ▼                     │
-│        │                             SWA Server (in kind)         │
-│        │                                    │                     │
-└────────┼────────────────────────────────────┼─────────────────────┘
-         │                                    │ ③ uploads signing key
-         │                                    ▼
-         │                     ┌──────────────────────────────┐
-         │                     │  CyberArk Secrets Manager    │
-         │                     │  SaaS control plane          │
-         │                     │  publishes public JWKS ◀──┐  │
-         │                     └───────────────────────────┼──┘
-         │                                                 │
-         └──④ present JWT-SVID──▶ OpenAI ──⑤ fetch JWKS────┘
-                                    │
-                                    ⑥ mint 5-min access token
-                                    ▼
-                            api.openai.com/v1
-```
+![Architecture](images/01-architecture.png)
 
 1. The workload asks the local SWA Agent for a JWT-SVID over a Unix socket.
 2. The agent has already attested itself to the SWA Server with a certificate
@@ -79,7 +56,11 @@ internet. Here, the SaaS control plane is the public surface.
 
 ## Documents
 
-Read in order. Each one gates the next.
+Read in order. Each one gates the next — the ordering is not cosmetic. The three
+steps marked ⚠️ in the diagram fail confusingly when taken out of order, and
+together they account for most of [07](07-troubleshooting.md).
+
+![Build order](images/04-build-order.png)
 
 | # | Document | What it covers |
 |---|---|---|
