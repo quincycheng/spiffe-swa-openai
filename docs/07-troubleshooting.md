@@ -626,7 +626,19 @@ by one second for every second the file has been sitting on disk — checking an
 SVID reports a large offset that has nothing to do with clock skew.
 
 On a fresh token, 0 to a couple of seconds is healthy. Tens of seconds means real
-drift; restart the Podman machine to resync its clock.
+drift. Step the VM clock — quicker than restarting the Podman machine:
+
+```bash
+podman machine ssh 'sudo chronyc -a makestep'
+```
+
+Observed after the Mac had slept: the VM was 52 seconds behind while chrony
+reported `System clock synchronized: yes`, because it had marked every source
+unusable. `makestep` brought it to within a second.
+
+The same drift also breaks **agent attestation** with a freshly signed
+certificate (`certificate has expired or is not yet valid ... current time ... is
+before ...`): see [09](09-prefix-and-secrets-manager.md#trap-certificate-has-expired-or-is-not-yet-valid-on-a-brand-new-certificate).
 
 ---
 

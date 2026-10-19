@@ -83,6 +83,14 @@ Two traps here, both of which cost real debugging time — see
 
 Values must be **unquoted**. Surrounding quotes become part of the value.
 
+Two optional variables configure the prefixed SPIFFE IDs of
+[09](09-prefix-and-secrets-manager.md). The core workshop ignores them:
+
+```bash
+SWA_SPIFFE_PREFIX=AI000-
+SWA_PREFIX_NODE_GROUP=ai-prefix-test
+```
+
 Two more variables get appended later, once the OpenAI console has issued them
 ([06](06-openai-federation.md#3-record-the-two-ids)). Leave them out for now:
 

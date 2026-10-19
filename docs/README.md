@@ -73,6 +73,7 @@ together they account for most of [07](07-troubleshooting.md).
 | 06 | [OpenAI federation](06-openai-federation.md) | Console setup, token exchange, negative tests |
 | 07 | [Troubleshooting](07-troubleshooting.md) | Every failure hit while building this, with fixes |
 | 08 | [Facilitator notes](08-facilitator-notes.md) | Timings, pre-baking, teardown, demo script |
+| 09 | [Prefix and Secrets Manager](09-prefix-and-secrets-manager.md) | `.env`-configured SPIFFE ID prefix; log in to Secrets Manager with the SPIFFE identity |
 
 ## Scripts
 
@@ -83,10 +84,12 @@ re-reading its prose.
 |---|---|
 | `swa-auth.sh` | Authenticate to the tenant; exports `SWA_TOKEN`, `SWA_API_BASE`. **Source it** |
 | `swa-api.sh` | `METHOD PATH [BODY]` wrapper with the two headers the API requires |
-| `restart-agent.sh` | Stop, clear the socket, start **one** agent, verify attestation |
+| `restart-agent.sh` | Stop, clear the socket, start **one** agent, verify attestation (`CONFIG_DIR=` for the prefix agent) |
 | `fetch-svid.sh` | Fetch a JWT-SVID for an audience (default: OpenAI) |
 | `exchange-openai.sh` | Exchange an SVID for an OpenAI access token, then call the API |
 | `verify-federation.sh` | The negative tests — run this one live |
+| `spiffe-prefix.sh` | Apply `SWA_SPIFFE_PREFIX` from `.env` to the prefix node group (`--restart` to use it) |
+| `secrets-manager-authn.sh` | `setup` / `test` / `cleanup` for logging in to Secrets Manager with the prefixed SVID |
 | `teardown.sh` | Remove everything, in reverse order |
 
 ## Verified results

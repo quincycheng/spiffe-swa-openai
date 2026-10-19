@@ -6,6 +6,7 @@
 # --- key material and certificates ---
 artifacts/
 agent-config/x509pop.*
+agent-config-prefix/x509pop.*
 *.key
 *.crt
 *.cert

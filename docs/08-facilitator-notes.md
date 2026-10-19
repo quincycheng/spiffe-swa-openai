@@ -245,11 +245,14 @@ Strictly innermost-first, because the control plane will not delete a parent
 while children remain:
 
 ```
-agent  ->  kind cluster  ->  registered component  ->  node group
+agent  ->  kind cluster  ->  Secrets Manager login objects (09)
+       ->  registered component  ->  node groups (incl. the 09 prefix group)
        ->  server group   ->  trust domain          ->  local key material
 ```
 
-Safe to re-run, and it acquires its own token if you have not sourced one.
+Safe to re-run, and it acquires its own token if you have not sourced one. If
+[09](09-prefix-and-secrets-manager.md) was never run, its lines show error
+statuses and change nothing.
 
 **It deliberately leaves the OpenAI Workload Identity Provider alone.** Delete it
 in the console if you want a truly clean slate. Keeping it saves the slowest

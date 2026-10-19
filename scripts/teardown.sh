@@ -17,13 +17,18 @@ if [ -z "${SWA_TOKEN:-}" ]; then
   # shellcheck source=/dev/null
   . "${REPO_ROOT}/scripts/swa-auth.sh" >/dev/null 2>&1 || true
 fi
+# Read after swa-auth.sh, which loads .env.
+PREFIX_NG="${SWA_PREFIX_NODE_GROUP:-ai-prefix-test}"
 
 echo "==> stopping the macOS agent"
 pkill -f "swa-agent run" 2>/dev/null && echo "   agent stopped" || echo "   not running"
-rm -f /tmp/swa-agent/public/api.sock
+rm -f /tmp/swa-agent/public/api.sock /tmp/swa-agent-prefix/public/api.sock
 
 echo "==> deleting the kind cluster"
 KIND_EXPERIMENTAL_PROVIDER=podman kind delete cluster --name swa-lab 2>&1 | sed 's/^/   /'
+
+echo "==> deleting the Secrets Manager login objects (docs/09), if any"
+scripts/secrets-manager-authn.sh cleanup 2>&1 | grep -E '^(==>|HTTP)' | sed 's/^/   /'
 
 echo "==> deleting SWA control-plane resources (innermost first)"
 # Strict order: registered components and node groups are children of the server
@@ -31,6 +36,7 @@ echo "==> deleting SWA control-plane resources (innermost first)"
 for p in \
   "/api/swa/trust-domains/${TD}/server-groups/${SG}/components/${COMP}" \
   "/api/swa/trust-domains/${TD}/server-groups/${SG}/node-groups/${NG}" \
+  "/api/swa/trust-domains/${TD}/server-groups/${SG}/node-groups/${PREFIX_NG}" \
   "/api/swa/trust-domains/${TD}/server-groups/${SG}" \
   "/api/swa/trust-domains/${TD}" ; do
   printf '   DELETE %-72s -> ' "$p"
@@ -43,7 +49,9 @@ scripts/swa-api.sh GET "/api/swa/trust-domains" 2>/dev/null | jq -c '{count}' ||
 echo "==> removing local key material"
 rm -f artifacts/ca.key artifacts/ca.crt artifacts/ca.srl \
       artifacts/agent.key artifacts/agent.crt artifacts/agent.csr \
-      agent-config/x509pop.key agent-config/x509pop.cert
+      agent-config/x509pop.key agent-config/x509pop.cert \
+      artifacts/agent-prefix.key artifacts/agent-prefix.crt artifacts/agent-prefix.csr \
+      agent-config-prefix/x509pop.key agent-config-prefix/x509pop.cert
 echo "   done"
 
 echo

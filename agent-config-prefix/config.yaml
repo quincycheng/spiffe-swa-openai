@@ -1,0 +1,38 @@
+# SWA Agent config for the PREFIXED node group (docs/09).
+#
+# Identical to agent-config/config.yaml except for the socket path, so the two
+# agents never share a socket. The x509pop certificate in this directory must
+# have CN = SWA_PREFIX_NODE_GROUP (default ai-prefix-test); that CN is what
+# places this agent in the node group whose template carries the prefix.
+trustDomain:
+  name: swa-lab.local
+
+bootstrap:
+  # Public, unauthenticated CA-bundle endpoint on the SaaS tenant, so we never
+  # need bootstrap.insecure: true.
+  bundleSourceUrl: https://apj-secrets.secretsmgr.cyberark.cloud/api/swa/trust-domains/swa-lab.local/.well-known/ca-bundles
+  insecure: false
+
+servers:
+  # Must match the server cert SAN (DNS:server.<trust-domain>).
+  # Requires: 127.0.0.1 server.swa-lab.local  in /etc/hosts
+  - addr: 127.0.0.1:8443
+
+agent:
+  socketPath: /tmp/swa-agent-prefix/public/api.sock
+  nodeAttestor:
+    type: x509pop
+    config:
+      cert: x509pop.cert
+      key: x509pop.key
+
+workload:
+  attestors:
+    - type: unix
+      config:
+        discover_workload_path: true
+        workload_size_limit: 0
+
+telemetry:
+  logging:
+    level: debug

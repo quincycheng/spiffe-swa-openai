@@ -21,6 +21,11 @@ REPO_ROOT="${REPO_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 cd "${REPO_ROOT}"
 
 AGENT="${AGENT:-swa-release-v1.0.2/binaries/swa-agent_1.0.0-SNAPSHOT_darwin_arm64/swa-agent}"
+# Override all three to run the prefixed-node-group agent instead (docs/09):
+#   CONFIG_DIR=agent-config-prefix SOCKET_DIR=/tmp/swa-agent-prefix/public \
+#   LOG=/tmp/agent-prefix.log scripts/restart-agent.sh
+# Only one agent runs at a time either way -- the pkill below stops them all.
+CONFIG_DIR="${CONFIG_DIR:-agent-config}"
 SOCKET_DIR="${SOCKET_DIR:-/tmp/swa-agent/public}"
 LOG="${LOG:-/tmp/agent.log}"
 
@@ -40,7 +45,7 @@ mkdir -p "${SOCKET_DIR}"
 
 # Truncating the log matters: otherwise the greps below count the previous run.
 echo "==> starting agent (log: ${LOG})"
-nohup "${AGENT}" run -d agent-config > "${LOG}" 2>&1 &
+nohup "${AGENT}" run -d "${CONFIG_DIR}" > "${LOG}" 2>&1 &
 sleep 12
 
 PID="$(pgrep -f 'swa-agent run' || true)"
